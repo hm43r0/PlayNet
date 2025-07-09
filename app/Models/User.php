@@ -45,4 +45,22 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function likedVideos()
+    {
+        return $this->belongsToMany(Video::class, 'video_likes');
+    }
+
+    public function dislikedVideos()
+    {
+        return $this->belongsToMany(Video::class, 'video_dislikes');
+    }
+    public function subscribers()
+    {
+        return $this->belongsToMany(User::class, 'subscriptions', 'channel_id', 'user_id');
+    }
+    public function subscriptions()
+    {
+        return $this->belongsToMany(User::class, 'subscriptions', 'user_id', 'channel_id');
+    }
 }
