@@ -58,7 +58,9 @@ video-player-page
                         </div>
                         @if(auth()->check() && auth()->id() !== $video->user->id)
                         <div>
-                            <button @click="subscribe()" :class="subscribed ? 'bg-[#232323] text-white' : 'bg-white text-black'" class="font-semibold px-5 py-2 rounded-full hover:bg-gray-200 transition text-sm min-w-[110px]">
+                            <button @click="subscribe()" 
+                                :class="subscribed ? 'subscribed-btn' : 'bg-white text-black hover:bg-gray-200'" 
+                                class="font-semibold px-5 py-2 rounded-full transition text-sm min-w-[110px]">
                                 <span x-show="!subscribed">Subscribe</span>
                                 <span x-show="subscribed">Subscribed</span>
                             </button>
@@ -131,9 +133,168 @@ video-player-page
                                     <span x-text="dislikeCount"></span>
                                 </button>
                             </form>
+                            <div x-data="{ 
+                                open: false, 
+                                copied: false,
+                                saveMenuOpen: false,
+                                playlists: [],
+                loadingPlaylists: false,
+                videoSavedToPlaylists: [],
+                watchLaterPlaylistId: null,
+                                async loadPlaylists() {
+                                    if (this.playlists.length > 0) return;
+                                    this.loadingPlaylists = true;
+                                    try {
+                                        const response = await fetch('{{ route('api.user-playlists') }}');
+                                        this.playlists = await response.json();
+                                        
+                                        // Check which playlists this video is already in
+                                        await this.checkVideoInPlaylists();
+                                    } catch (error) {
+                                        console.error('Failed to load playlists:', error);
+                                    }
+                                    this.loadingPlaylists = false;
+                                },
+                async checkVideoInPlaylists() {
+                    try {
+                        const response = await fetch('/api/video-playlists/{{ $video->id }}');
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.videoSavedToPlaylists = data.playlist_ids || data; // Handle both old and new format
+                            this.watchLaterPlaylistId = data.watch_later_id || null;
+                        }
+                    } catch (error) {
+                        console.error('Failed to check video playlists:', error);
+                    }
+                },
+                isVideoInPlaylist(playlistId) {
+                    return this.videoSavedToPlaylists.includes(playlistId);
+                },
+                isVideoInWatchLater() {
+                    return this.watchLaterPlaylistId && this.videoSavedToPlaylists.includes(this.watchLaterPlaylistId);
+                },
+                                get isVideoSaved() {
+                                    return this.videoSavedToPlaylists.length > 0;
+                                },
+                                async togglePlaylist(playlistId) {
+                                    try {
+                                        const isCurrentlyInPlaylist = this.isVideoInPlaylist(playlistId);
+                                        const url = isCurrentlyInPlaylist ? '{{ route('playlist.remove-video') }}' : '{{ route('playlist.add-video') }}';
+                                        
+                                        const response = await fetch(url, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                            },
+                                            body: JSON.stringify({
+                                                video_id: {{ $video->id }},
+                                                playlist_id: playlistId
+                                            })
+                                        });
+                                        
+                                        const data = await response.json();
+                                        if (data.success) {
+                                            if (isCurrentlyInPlaylist) {
+                                                this.videoSavedToPlaylists = this.videoSavedToPlaylists.filter(id => id !== playlistId);
+                                            } else {
+                                                this.videoSavedToPlaylists.push(playlistId);
+                                            }
+                                        } else {
+                                            alert(data.error || 'Operation failed');
+                                        }
+                                    } catch (error) {
+                                        alert('Operation failed');
+                                    }
+                                },
+                                async saveToWatchLater() {
+                                    try {
+                                        const response = await fetch('{{ route('watch-later.add', $video) }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                            }
+                                        });
+                                        const data = await response.json();
+                                        if (data.success) {
+                                            // Add watch later playlist ID if we have it
+                                            await this.checkVideoInPlaylists();
+                                        } else {
+                                            alert(data.error || 'Failed to add to Watch Later');
+                                        }
+                                    } catch (error) {
+                                        alert('Failed to add to Watch Later');
+                                    }
+                                }
+                            }" class="relative" x-init="checkVideoInPlaylists()">
+                                <!-- Save Menu Button -->
+                                <button @click="saveMenuOpen = true; loadPlaylists()" 
+                                        class="flex items-center gap-1 bg-[#232323] hover:bg-[#333] text-white px-4 py-2 rounded-full text-sm font-semibold transition">
+                                    <i :class="isVideoSaved ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-lg"></i>
+                                    <span x-text="isVideoSaved ? 'Saved' : 'Save'"></span>
+                                </button>
+                                
+                                <!-- Save Popup Modal -->
+                                <div x-show="saveMenuOpen" @click.away="saveMenuOpen = false" 
+                                     class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+                                     x-transition style="display: none;">
+                                    <div class="bg-[#232323] rounded-lg shadow-xl border border-[#333] w-full max-w-md mx-4">
+                                        <div class="flex items-center justify-between p-4 border-b border-[#333]">
+                                            <h3 class="text-lg font-semibold text-white">Save video to...</h3>
+                                            <button @click="saveMenuOpen = false" class="text-[#aaa] hover:text-white">
+                                                <i class="fa-solid fa-xmark text-xl"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="p-4 max-h-80 overflow-y-auto">
+                                            <!-- Watch Later -->
+                                            <button @click="saveToWatchLater()" 
+                                                    class="w-full text-left px-3 py-3 hover:bg-[#333] rounded flex items-center gap-3 text-white mb-2">
+                                                <i class="fa-regular fa-clock text-lg w-5"></i>
+                                                <span>Watch Later</span>
+                                                <i x-show="isVideoInWatchLater()" class="fa-solid fa-check text-blue-400 ml-auto"></i>
+                                            </button>
+                                            
+                                            <div class="border-t border-[#333] my-3"></div>
+                                            
+                                            <!-- Loading State -->
+                                            <div x-show="loadingPlaylists" class="px-3 py-4 text-[#aaa] text-sm text-center">
+                                                <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+                                                Loading playlists...
+                                            </div>
+                                            
+                                            <!-- Playlists -->
+                                            <template x-for="playlist in playlists" :key="playlist.id">
+                                                <button @click="togglePlaylist(playlist.id)" 
+                                                        class="w-full text-left px-3 py-3 hover:bg-[#333] rounded flex items-center gap-3 text-white mb-1">
+                                                    <i class="fa-solid fa-list text-lg w-5"></i>
+                                                    <span x-text="playlist.name" class="flex-1"></span>
+                                                    <i x-show="isVideoInPlaylist(playlist.id)" class="fa-solid fa-check text-blue-400"></i>
+                                                </button>
+                                            </template>
+                                            
+                                            <!-- No Playlists -->
+                                            <div x-show="!loadingPlaylists && playlists.length === 0" 
+                                                 class="px-3 py-4 text-[#aaa] text-sm text-center">
+                                                No playlists found
+                                            </div>
+                                            
+                                            <div class="border-t border-[#333] my-3"></div>
+                                            
+                                            <!-- Create New Playlist -->
+                                            <a href="{{ route('playlists') }}" 
+                                               class="w-full text-left px-3 py-3 hover:bg-[#333] rounded flex items-center gap-3 text-white block">
+                                                <i class="fa-solid fa-plus text-lg w-5"></i>
+                                                <span>Create new playlist</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div x-data="{ open: false, copied: false }" class="relative">
                                 <button @click="open = true" class="flex items-center gap-1 bg-[#232323] hover:bg-[#333] text-white px-4 py-2 rounded-full text-sm font-semibold transition">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v.01"/><path d="M8 12v.01"/><path d="M12 12v.01"/><path d="M16 12v.01"/><path d="M20 12v.01"/></svg>
+                                    <i class="fa-solid fa-share text-lg"></i>
                                     Share
                                 </button>
                                 <div x-show="open" @click.away="open = false" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-transition style="display: none;">
@@ -210,3 +371,21 @@ video-player-page
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+    /* Remove hover effect for subscribed button, or use a subtle color */
+    .subscribed-btn {
+        background: #232323 !important;
+        color: #fff !important;
+        border: 1px solid #333;
+        transition: background 0.2s, color 0.2s;
+    }
+    .subscribed-btn:hover, .subscribed-btn:focus {
+        background: #232323 !important;
+        color: #fff !important;
+        /* Optionally, add a very subtle effect: */
+        box-shadow: 0 0 0 2px #33333355;
+    }
+</style>
+@endpush

@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Video;
+use App\Models\VideoHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class VideoController extends Controller
 {
+    use AuthorizesRequests;
+
     // Show all videos for homepage (public)
     public function all()
     {
@@ -54,6 +58,24 @@ class VideoController extends Controller
     {
         $video->load('user');
         $user = \Illuminate\Support\Facades\Auth::user();
+        
+        // Record video history for authenticated users
+        if ($user) {
+            // Check if this video was viewed recently (within last hour) to prevent spam
+            $existingHistory = VideoHistory::where('user_id', $user->id)
+                ->where('video_id', $video->id)
+                ->where('created_at', '>=', now()->subHour())
+                ->first();
+            
+            // If not viewed recently, create a new history entry
+            if (!$existingHistory) {
+                VideoHistory::create([
+                    'user_id' => $user->id,
+                    'video_id' => $video->id,
+                ]);
+            }
+        }
+        
         $liked = $user ? $video->likes()->where('user_id', $user->id)->exists() : false;
         $likeCount = $video->likes()->count();
         $disliked = $user ? $video->dislikes()->where('user_id', $user->id)->exists() : false;
@@ -109,5 +131,39 @@ class VideoController extends Controller
             'count' => $video->dislikes()->count(),
             'likeCount' => $video->likes()->count(),
         ]);
+    }
+
+    public function edit(Video $video)
+    {
+        $this->authorize('update', $video); // Only owner can edit
+        return view('video-edit', compact('video'));
+    }
+
+    public function update(Request $request, Video $video)
+    {
+        $this->authorize('update', $video);
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'thumbnail' => [
+                'nullable',
+                'mimes:jpeg,png,jpg,gif,webp,avif',
+                'max:10240', // 10MB max
+            ],
+        ]);
+        $video->title = $request->title;
+        $video->description = $request->description;
+        if ($request->hasFile('thumbnail')) {
+            $video->thumbnail_path = $request->file('thumbnail')->store('thumbnails', 'public');
+        }
+        $video->save();
+        return redirect()->route('videos.index')->with('success', 'Video updated successfully!');
+    }
+
+    public function destroy(Video $video)
+    {
+        $this->authorize('delete', $video);
+        $video->delete();
+        return redirect()->route('videos.index')->with('success', 'Video deleted successfully!');
     }
 }

@@ -48,12 +48,12 @@ class User extends Authenticatable
 
     public function likedVideos()
     {
-        return $this->belongsToMany(Video::class, 'video_likes');
+        return $this->belongsToMany(Video::class, 'video_likes')->withTimestamps();
     }
 
     public function dislikedVideos()
     {
-        return $this->belongsToMany(Video::class, 'video_dislikes');
+        return $this->belongsToMany(Video::class, 'video_dislikes')->withTimestamps();
     }
     public function subscribers()
     {
@@ -62,5 +62,41 @@ class User extends Authenticatable
     public function subscriptions()
     {
         return $this->belongsToMany(User::class, 'subscriptions', 'user_id', 'channel_id');
+    }
+
+    // Linked accounts relationships
+    public function linkedAccounts()
+    {
+        return $this->belongsToMany(User::class, 'linked_accounts', 'primary_user_id', 'linked_user_id');
+    }
+
+    public function linkedByAccounts()
+    {
+        return $this->belongsToMany(User::class, 'linked_accounts', 'linked_user_id', 'primary_user_id');
+    }
+
+    // Get all accounts that this user can switch to
+    public function getAllLinkedAccounts()
+    {
+        $linked = $this->linkedAccounts;
+        $linkedBy = $this->linkedByAccounts;
+        
+        return $linked->merge($linkedBy)->unique('id');
+    }
+
+    // Playlist relationships
+    public function playlists()
+    {
+        return $this->hasMany(Playlist::class);
+    }
+
+    public function watchLaterPlaylist()
+    {
+        return $this->playlists()->watchLater()->first();
+    }
+
+    public function regularPlaylists()
+    {
+        return $this->playlists()->regular();
     }
 }

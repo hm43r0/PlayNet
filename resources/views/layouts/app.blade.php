@@ -42,7 +42,7 @@
             class="flex items-center justify-between px-6 py-2 bg-[#0f0f0f] sticky top-0 z-30 border-b border-[#222] h-14 w-full">
             <div class="flex items-center gap-4 min-w-[220px]">
                 <button class="p-2 hover:bg-[#222] rounded-full"
-                    @click="isVideoPage ? sidebarOpen = true : sidebarOpen = !sidebarOpen">
+                    @click="sidebarOpen = !sidebarOpen">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
                 <a href="/" class="flex items-center space-x-0.5">
@@ -83,6 +83,8 @@
                         <div x-show="open" @click.away="open = false"
                             class="absolute right-0 mt-2 w-80 bg-[#232323] rounded-xl shadow-lg z-50 border border-[#333]"
                             style="display: none;" x-transition>
+                            
+                            <!-- Current Account -->
                             <div class="p-4 border-b border-[#333]">
                                 <div class="flex items-center gap-3">
                                     <div
@@ -96,7 +98,39 @@
                                 </div>
                                 <div class="mt-2 text-xs text-blue-400 cursor-pointer">View your channel</div>
                             </div>
-                            <form method="POST" action="{{ route('logout') }}" class="mt-2">
+                            
+                            <!-- Linked Accounts -->
+                            @if(auth()->user()->getAllLinkedAccounts()->count() > 0)
+                                <div class="border-b border-[#333]">
+                                    <div class="px-4 py-2 text-xs text-[#aaa] font-medium">Switch Account</div>
+                                    @foreach(auth()->user()->getAllLinkedAccounts() as $linkedUser)
+                                        <form method="POST" action="{{ route('account.switch', $linkedUser) }}" class="inline-block w-full">
+                                            @csrf
+                                            <button type="submit" class="w-full text-left px-4 py-3 hover:bg-[#181818] flex items-center gap-3 text-white">
+                                                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">
+                                                    {{ strtoupper($linkedUser->name[0]) }}
+                                                </div>
+                                                <div>
+                                                    <div class="font-medium text-sm">{{ $linkedUser->name }}</div>
+                                                    <div class="text-xs text-[#aaa]">{{ $linkedUser->email }}</div>
+                                                </div>
+                                            </button>
+                                        </form>
+                                    @endforeach
+                                </div>
+                            @endif
+                            
+                            <!-- Account Management -->
+                            <div class="border-b border-[#333]">
+                                <a href="{{ route('account.link.form') }}" 
+                                   class="w-full text-left px-4 py-3 hover:bg-[#181818] flex items-center gap-3 text-white text-sm">
+                                    <i class="fa-solid fa-plus w-5"></i>
+                                    <span>Add another account</span>
+                                </a>
+                            </div>
+                            
+                            <!-- Sign Out -->
+                            <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit"
                                     class="w-full text-left px-4 py-3 hover:bg-[#181818] flex items-center gap-3 text-white text-base rounded-b-xl">
@@ -115,16 +149,18 @@
             </div>
         </header>
         <div class="flex">
-            <!-- Sidebar (starts below header) -->
-            <template x-if="showSidebar">
+            <!-- Sidebar for Video Pages (Fixed Overlay) -->
+            <template x-if="isVideoPage">
                 <div>
-                    <div class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" x-show="sidebarOpen && isVideoPage"
+                    <!-- Backdrop for mobile/video page sidebar -->
+                    <div class="fixed inset-0 bg-black bg-opacity-50 z-40" x-show="sidebarOpen"
                         @click="sidebarOpen = false" x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
                         x-transition:leave-end="opacity-0" style="display: none;"></div>
-                    <aside x-show="sidebarOpen && isVideoPage"
-                        class="fixed top-0 left-0 w-60 bg-[#181818] h-full flex flex-col pt-2 z-50 border-r border-[#222] transition-all duration-200 lg:hidden"
+                    <!-- Fixed sidebar for video pages -->
+                    <aside x-show="sidebarOpen"
+                        class="fixed top-0 left-0 w-60 bg-[#0f0f0f] h-full flex flex-col pt-16 z-50 border-r border-[#222] transition-all duration-200"
                         x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="-translate-x-60 opacity-0"
                         x-transition:enter-end="translate-x-0 opacity-100"
@@ -138,6 +174,8 @@
                     </aside>
                 </div>
             </template>
+            
+            <!-- Sidebar for Regular Pages (Static) -->
             <aside x-show="sidebarOpen && !isVideoPage"
                 class="w-60 bg-[#181818] h-[calc(100vh-56px)] flex-col pt-2 z-20 border-r border-[#222] transition-all duration-200 sticky top-14 lg:flex hidden"
                 x-transition:enter="transition ease-out duration-200"
@@ -148,6 +186,7 @@
                     @include('partials.sidebar')
                 </nav>
             </aside>
+            
             <!-- Main Content Slot -->
             <main class="flex-1 px-8 pt-8">
                 @yield('content')
@@ -161,9 +200,6 @@
             return {
                 sidebarOpen: true,
                 isVideoPage: false,
-                get showSidebar() {
-                    return true;
-                },
                 init() {
                     this.isVideoPage = document.body.classList.contains('video-player-page');
                     if (this.isVideoPage) {

@@ -24,12 +24,19 @@ class Video extends Model
 
     public function likes()
     {
-        return $this->belongsToMany(User::class, 'video_likes');
+        return $this->belongsToMany(User::class, 'video_likes')->withTimestamps();
     }
 
     public function dislikes()
     {
-        return $this->belongsToMany(User::class, 'video_dislikes');
+        return $this->belongsToMany(User::class, 'video_dislikes')->withTimestamps();
+    }
+
+    public function playlists()
+    {
+        return $this->belongsToMany(Playlist::class, 'playlist_videos')
+                    ->withPivot('order_position')
+                    ->withTimestamps();
     }
 
     // Get video duration in H:i:s format

@@ -64,14 +64,28 @@
     <!-- Placeholder for user's videos grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         @forelse($videos as $video)
-            <x-video-card
-                :video="$video"
-                thumbnail="{{ asset('storage/' . $video->thumbnail_path) }}"
-                duration="{{ $video->duration }}"
-                title="{{ $video->title }}"
-                channel="{{ $video->user->name ?? 'Unknown' }}"
-                meta="{{ $video->created_at->diffForHumans() }}"
-            />
+            <div class="relative group">
+                <x-video-card
+                    :video="$video"
+                    thumbnail="{{ asset('storage/' . $video->thumbnail_path) }}"
+                    duration="{{ $video->duration }}"
+                    title="{{ $video->title }}"
+                    channel="{{ $video->user->name ?? 'Unknown' }}"
+                    meta="{{ $video->created_at->diffForHumans() }}"
+                />
+                <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition z-10">
+                    <a href="{{ route('videos.edit', $video) }}" class="bg-blue-600 hover:bg-blue-700 p-2 rounded-full" title="Edit video">
+                        <i class="fa-solid fa-edit text-xs"></i>
+                    </a>
+                    <form method="POST" action="{{ route('videos.destroy', $video) }}" onsubmit="return confirm('Are you sure you want to delete this video?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 p-2 rounded-full" title="Delete video">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
         @empty
             <div class="col-span-full text-center text-gray-400 py-12">No videos uploaded yet.</div>
         @endforelse
