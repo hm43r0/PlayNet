@@ -1,3 +1,18 @@
+# PlayNet: YouTube-Style Video Platform
+
+PlayNet is a modern, YouTube-inspired video sharing platform built with Laravel. It features:
+
+- User authentication and channel subscriptions
+- Video upload, playback, and playlist management
+- Like/dislike system with real-time UI feedback
+- Unique view counter (per authenticated user)
+- Watch history and watch later functionality
+- Realistic demo data seeding for users, videos, and playlists
+- Responsive, YouTube-style UI using Tailwind CSS and SVG icons
+- Related videos, sharing, and save-to-playlist features
+
+PlayNet is designed for learning, demo, and rapid prototyping of video-centric social platforms. It demonstrates best practices in Laravel, Eloquent, and modern frontend development.
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
