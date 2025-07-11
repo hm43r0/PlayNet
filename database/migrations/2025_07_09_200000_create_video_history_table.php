@@ -10,6 +10,7 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('video_id')->constrained()->onDelete('cascade');
             $table->timestamps();
+            $table->timestamp('watched_at')->nullable();
             $table->unique(['user_id', 'video_id', 'created_at']); // Prevent duplicate for same video at same time
         });
     }

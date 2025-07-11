@@ -50,9 +50,9 @@
                     <span class="text-xl ml-1 font-bold">YouTube</span><sup class="text-xs ml-0.5 text-[#aaa]">PK</sup>
                 </a>
             </div>
-            <form class="flex flex-1 justify-center max-w-[600px] mx-8">
+            <form class="flex flex-1 justify-center max-w-[600px] mx-8" method="GET" action="{{ route('home') }}">
                 <div class="flex w-full">
-                    <input type="text" placeholder="Search"
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search"
                         class="flex-1 rounded-l-full px-4 py-2 bg-[#121212] text-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-base border border-[#303030] border-r-0 placeholder-[#606060]">
                     <button type="submit"
                         class="bg-[#222] rounded-r-full px-6 py-2 text-white border border-l-0 border-[#303030] hover:bg-[#3a3a3a]">

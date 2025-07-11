@@ -65,10 +65,21 @@ Route::middleware('auth')->group(function () {
     })->name('liked');
     Route::get('/history', function () {
         $user = Auth::user();
-        $history = VideoHistory::with('video.user')
+        $search = request('search');
+        $historyQuery = VideoHistory::with('video.user')
             ->where('user_id', $user->id)
-            ->orderByDesc('created_at')
-            ->get();
+            ->orderByDesc('created_at');
+        if ($search) {
+            $historyQuery->whereHas('video', function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($q2) use ($search) {
+                      $q2->where('name', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+        $history = $historyQuery->get();
         $grouped = $history->groupBy(function($item) {
             $date = $item->created_at;
             if ($date->isToday()) return 'Today';
@@ -108,3 +119,34 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth')->na
 Route::get('/videos/{video}/edit', [\App\Http\Controllers\VideoController::class, 'edit'])->name('videos.edit');
 Route::put('/videos/{video}', [\App\Http\Controllers\VideoController::class, 'update'])->name('videos.update');
 Route::delete('/videos/{video}', [\App\Http\Controllers\VideoController::class, 'destroy'])->name('videos.destroy');
+Route::post('/history/clear', function () {
+    $user = Auth::user();
+    \App\Models\VideoHistory::where('user_id', $user->id)->delete();
+    return redirect()->route('history')->with('success', 'Watch history cleared.');
+})->name('history.clear');
+
+Route::post('/history/clear-range', function (\Illuminate\Http\Request $request) {
+    $user = Auth::user();
+    $from = $request->input('from');
+    $to = $request->input('to');
+    $query = \App\Models\VideoHistory::where('user_id', $user->id);
+    if ($from) {
+        $query->whereDate('created_at', '>=', $from);
+    }
+    if ($to) {
+        $query->whereDate('created_at', '<=', $to);
+    }
+    $deleted = $query->delete();
+    return redirect()->route('history')->with('success', $deleted ? 'Selected watch history cleared.' : 'No history found for selected dates.');
+})->name('history.clear.range');
+Route::post('/history/pause-toggle', function () {
+    $user = Auth::user();
+    $paused = session('history_paused', $user ? ($user->history_paused ?? false) : false);
+    $paused = !$paused;
+    session(['history_paused' => $paused]);
+    if ($user) {
+        $user->history_paused = $paused;
+        $user->save();
+    }
+    return redirect()->route('history')->with('success', $paused ? 'Watch history paused.' : 'Watch history resumed.');
+})->name('history.pause.toggle');

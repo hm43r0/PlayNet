@@ -15,7 +15,19 @@ class VideoController extends Controller
     // Show all videos for homepage (public)
     public function all()
     {
-        $videos = Video::with('user')->latest()->get();
+        $search = request('search');
+        $videosQuery = Video::with('user')->latest();
+        if ($search) {
+            $videosQuery->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($q2) use ($search) {
+                      $q2->where('name', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+        $videos = $videosQuery->get();
         return view('welcome', compact('videos'));
     }
 
@@ -58,17 +70,15 @@ class VideoController extends Controller
     {
         $video->load('user');
         $user = \Illuminate\Support\Facades\Auth::user();
-        
-        // Record video history for authenticated users
-        if ($user) {
-            // Check if this video was viewed recently (within last hour) to prevent spam
+        if ($user && (!$user->history_paused && !session('history_paused', false))) {
             $existingHistory = VideoHistory::where('user_id', $user->id)
                 ->where('video_id', $video->id)
-                ->where('created_at', '>=', now()->subHour())
                 ->first();
-            
-            // If not viewed recently, create a new history entry
             if (!$existingHistory) {
+                $video->increment('views');
+            }
+            $recentHistory = $existingHistory && $existingHistory->created_at >= now()->subHour();
+            if (!$recentHistory) {
                 VideoHistory::create([
                     'user_id' => $user->id,
                     'video_id' => $video->id,

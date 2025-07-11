@@ -51,15 +51,17 @@ video-player-page
                             <div class="min-w-0">
                                 <div class="flex items-center gap-1">
                                     <span class="font-semibold text-white text-base truncate max-w-[160px]">{{ $video->user->name ?? 'Unknown' }}</span>
-                                    <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z" clip-rule="evenodd"/></svg>
+                                    <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z" clip-rule="evenodd" />
+                                    </svg>
                                 </div>
                                 <div class="text-[#aaa] text-xs"><span x-text="subscriberCount"></span> subscribers</div>
                             </div>
                         </div>
                         @if(auth()->check() && auth()->id() !== $video->user->id)
                         <div>
-                            <button @click="subscribe()" 
-                                :class="subscribed ? 'subscribed-btn' : 'bg-white text-black hover:bg-gray-200'" 
+                            <button @click="subscribe()"
+                                :class="subscribed ? 'subscribed-btn' : 'bg-white text-black hover:bg-gray-200'"
                                 class="font-semibold px-5 py-2 rounded-full transition text-sm min-w-[110px]">
                                 <span x-show="!subscribed">Subscribe</span>
                                 <span x-show="subscribed">Subscribed</span>
@@ -121,18 +123,30 @@ video-player-page
                                 });
                             }
                         }">
-                            <form @submit.prevent="toggleLike()">
-                                <button type="submit" :class="liked ? 'bg-blue-600' : 'bg-[#232323] hover:bg-[#333]'" class="flex items-center gap-1 text-white px-4 py-2 rounded-full text-sm font-semibold transition">
-                                    <i :class="liked ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'" class="text-lg"></i>
-                                    <span x-text="likeCount"></span>
-                                </button>
-                            </form>
-                            <form @submit.prevent="toggleDislike()">
-                                <button type="submit" :class="disliked ? 'bg-blue-600' : 'bg-[#232323] hover:bg-[#333]'" class="flex items-center gap-1 text-white px-4 py-2 rounded-full text-sm font-semibold transition">
-                                    <i :class="disliked ? 'fa-solid fa-thumbs-down' : 'fa-regular fa-thumbs-down'" class="text-lg"></i>
-                                    <span x-text="dislikeCount"></span>
-                                </button>
-                            </form>
+                            <div class="flex items-center bg-[#181818] px-4 py-2 rounded-full space-x-4">
+                                <form @submit.prevent="toggleLike()">
+                                    <button type="submit"
+                                        :class="liked && !disliked ? 'bg-blue-600 text-white' : 'bg-[#181818] hover:bg-[#232323] text-[#aaa]'"
+                                        class="flex items-center px-3 py-1.5 rounded-full font-semibold transition focus:outline-none focus:ring-2 focus:ring-blue-500 group">
+                                        <!-- Thumbs up SVG -->
+                                        <svg :class="liked && !disliked ? 'text-white fill-white' : 'text-[#aaa] fill-[#aaa] group-hover:text-blue-500 group-hover:fill-blue-500'" class="w-6 h-6 mr-1 transition-colors duration-150" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M8 11H3v10h5V11zm10.77 0H14.54l1.52-4.94A2.003 2.003 0 0 0 14.38 4c-.58 0-1.14.24-1.52.65L7 11v10h10.43c1.06 0 1.98-.67 2.19-1.61l1.34-6c.23-1.24-.82-2.39-2.23-2.39zM7 20H4v-8h3v8zm12.98-6.83l-1.34 6c-.1.47-.61.82-1.21.82H8V11.39l5.6-6.06c.19-.21.48-.33.78-.33.26 0 .5.11.63.3.07.1.15.26.09.47L13.58 10.71l-.4 1.29h4.23c.41 0 .8.17 1.03.46.12.15.25.4.18.72z"/>
+                                        </svg>
+                                        <span class="ml-1 font-bold text-base" x-text="likeCount"></span>
+                                    </button>
+                                </form>
+                                <span class="border-l border-gray-700 h-6 mx-2"></span>
+                                <form @submit.prevent="toggleDislike()">
+                                    <button type="submit"
+                                        :class="disliked && !liked ? 'bg-blue-600 text-white' : 'bg-[#181818] hover:bg-[#232323] text-[#aaa]'"
+                                        class="flex items-center px-3 py-1.5 rounded-full font-semibold transition focus:outline-none focus:ring-2 focus:ring-blue-500 group">
+                                        <!-- Thumbs down SVG -->
+                                        <svg :class="disliked && !liked ? 'text-white fill-white' : 'text-[#aaa] fill-[#aaa] group-hover:text-blue-500 group-hover:fill-blue-500'" class="w-6 h-6 transition-colors duration-150" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M17 4H6.57c-1.07 0-1.98.67-2.19 1.61l-1.34 6C2.77 12.85 3.82 14 5.23 14h4.23l-1.52 4.94C7.62 19.97 8.46 21 9.62 21c.58 0 1.14-.24 1.52-.65L17 14h4V4h-4zm-6.6 15.67c-.19.21-.48.33-.78.33-.26 0-.5-.11-.63-.3-.07-.1-.15-.26-.09-.47l1.52-4.94.4-1.29H5.23c-.41 0-.8-.17-1.03-.46-.12-.15-.25-.4-.18-.72l1.34-6c.1-.47.61-.82 1.21-.82H16v8.61l-5.6 6.06zM20 13h-3V5h3v8z"></path>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
                             <div x-data="{ 
                                 open: false, 
                                 copied: false,
@@ -228,16 +242,16 @@ video-player-page
                                 }
                             }" class="relative" x-init="checkVideoInPlaylists()">
                                 <!-- Save Menu Button -->
-                                <button @click="saveMenuOpen = true; loadPlaylists()" 
-                                        class="flex items-center gap-1 bg-[#232323] hover:bg-[#333] text-white px-4 py-2 rounded-full text-sm font-semibold transition">
+                                <button @click="saveMenuOpen = true; loadPlaylists()"
+                                    class="flex items-center gap-1 bg-[#232323] hover:bg-[#333] text-white px-4 py-2 rounded-full text-sm font-semibold transition">
                                     <i :class="isVideoSaved ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'" class="text-lg"></i>
                                     <span x-text="isVideoSaved ? 'Saved' : 'Save'"></span>
                                 </button>
-                                
+
                                 <!-- Save Popup Modal -->
-                                <div x-show="saveMenuOpen" @click.away="saveMenuOpen = false" 
-                                     class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
-                                     x-transition style="display: none;">
+                                <div x-show="saveMenuOpen" @click.away="saveMenuOpen = false"
+                                    class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+                                    x-transition style="display: none;">
                                     <div class="bg-[#232323] rounded-lg shadow-xl border border-[#333] w-full max-w-md mx-4">
                                         <div class="flex items-center justify-between p-4 border-b border-[#333]">
                                             <h3 class="text-lg font-semibold text-white">Save video to...</h3>
@@ -245,45 +259,45 @@ video-player-page
                                                 <i class="fa-solid fa-xmark text-xl"></i>
                                             </button>
                                         </div>
-                                        
+
                                         <div class="p-4 max-h-80 overflow-y-auto">
                                             <!-- Watch Later -->
-                                            <button @click="saveToWatchLater()" 
-                                                    class="w-full text-left px-3 py-3 hover:bg-[#333] rounded flex items-center gap-3 text-white mb-2">
+                                            <button @click="saveToWatchLater()"
+                                                class="w-full text-left px-3 py-3 hover:bg-[#333] rounded flex items-center gap-3 text-white mb-2">
                                                 <i class="fa-regular fa-clock text-lg w-5"></i>
                                                 <span>Watch Later</span>
                                                 <i x-show="isVideoInWatchLater()" class="fa-solid fa-check text-blue-400 ml-auto"></i>
                                             </button>
-                                            
+
                                             <div class="border-t border-[#333] my-3"></div>
-                                            
+
                                             <!-- Loading State -->
                                             <div x-show="loadingPlaylists" class="px-3 py-4 text-[#aaa] text-sm text-center">
                                                 <i class="fa-solid fa-spinner fa-spin mr-2"></i>
                                                 Loading playlists...
                                             </div>
-                                            
+
                                             <!-- Playlists -->
                                             <template x-for="playlist in playlists" :key="playlist.id">
-                                                <button @click="togglePlaylist(playlist.id)" 
-                                                        class="w-full text-left px-3 py-3 hover:bg-[#333] rounded flex items-center gap-3 text-white mb-1">
+                                                <button @click="togglePlaylist(playlist.id)"
+                                                    class="w-full text-left px-3 py-3 hover:bg-[#333] rounded flex items-center gap-3 text-white mb-1">
                                                     <i class="fa-solid fa-list text-lg w-5"></i>
                                                     <span x-text="playlist.name" class="flex-1"></span>
                                                     <i x-show="isVideoInPlaylist(playlist.id)" class="fa-solid fa-check text-blue-400"></i>
                                                 </button>
                                             </template>
-                                            
+
                                             <!-- No Playlists -->
-                                            <div x-show="!loadingPlaylists && playlists.length === 0" 
-                                                 class="px-3 py-4 text-[#aaa] text-sm text-center">
+                                            <div x-show="!loadingPlaylists && playlists.length === 0"
+                                                class="px-3 py-4 text-[#aaa] text-sm text-center">
                                                 No playlists found
                                             </div>
-                                            
+
                                             <div class="border-t border-[#333] my-3"></div>
-                                            
+
                                             <!-- Create New Playlist -->
-                                            <a href="{{ route('playlists') }}" 
-                                               class="w-full text-left px-3 py-3 hover:bg-[#333] rounded flex items-center gap-3 text-white block">
+                                            <a href="{{ route('playlists') }}"
+                                                class="w-full text-left px-3 py-3 hover:bg-[#333] rounded flex items-center gap-3 text-white block">
                                                 <i class="fa-solid fa-plus text-lg w-5"></i>
                                                 <span>Create new playlist</span>
                                             </a>
@@ -291,7 +305,7 @@ video-player-page
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div x-data="{ open: false, copied: false }" class="relative">
                                 <button @click="open = true" class="flex items-center gap-1 bg-[#232323] hover:bg-[#333] text-white px-4 py-2 rounded-full text-sm font-semibold transition">
                                     <i class="fa-solid fa-share text-lg"></i>
@@ -324,14 +338,19 @@ video-player-page
                                 </div>
                             </div>
                             <button class="flex items-center gap-1 bg-[#232323] hover:bg-[#333] text-white px-2 py-2 rounded-full text-sm font-semibold transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="12" r="2"/></svg>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="2" />
+                                    <circle cx="19" cy="12" r="2" />
+                                    <circle cx="5" cy="12" r="2" />
+                                </svg>
                             </button>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 text-[#aaa] text-sm mt-1 flex-wrap">
-                        <span>{{ $video->created_at->diffForHumans() }}</span>
+                        <span>{{ $video->formatted_views }} views</span>
+                        <span>• {{ $video->created_at->diffForHumans() }}</span>
                         @if($video->duration)
-                            <span>• {{ $video->duration }}</span>
+                        <span>• {{ $video->duration }}</span>
                         @endif
                     </div>
                 </div>
@@ -348,24 +367,24 @@ video-player-page
                 <span class="bg-[#232323] text-white text-xs px-3 py-1 rounded-full font-semibold">From {{ $video->user->name ?? 'Uploader' }}</span>
             </div>
             @php
-                $related = \App\Models\Video::where('id', '!=', $video->id)->latest()->take(8)->get();
+            $related = \App\Models\Video::where('id', '!=', $video->id)->latest()->take(8)->get();
             @endphp
             @foreach($related as $rel)
-                <a href="{{ route('video.show', $rel->id) }}" class="flex gap-3 group hover:bg-[#232323] rounded-lg p-2 transition">
-                    <div class="w-32 h-20 rounded-lg overflow-hidden bg-[#222] flex items-center justify-center">
-                        <img src="{{ asset('storage/' . $rel->thumbnail_path) }}" alt="{{ $rel->title }}" class="w-full h-full object-cover object-center group-hover:opacity-90 transition">
+            <a href="{{ route('video.show', $rel->id) }}" class="flex gap-3 group hover:bg-[#232323] rounded-lg p-2 transition">
+                <div class="w-32 h-20 rounded-lg overflow-hidden bg-[#222] flex items-center justify-center">
+                    <img src="{{ asset('storage/' . $rel->thumbnail_path) }}" alt="{{ $rel->title }}" class="w-full h-full object-cover object-center group-hover:opacity-90 transition">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-sm text-white leading-tight mb-1 truncate" title="{{ $rel->title }}">{{ $rel->title }}</div>
+                    <div class="text-[#aaa] text-xs truncate">{{ $rel->user->name ?? 'Unknown' }}</div>
+                    <div class="text-[#aaa] text-xs flex items-center gap-2 mt-1">
+                        <span>{{ $rel->created_at->diffForHumans() }}</span>
+                        @if($rel->duration)
+                        <span>• {{ $rel->duration }}</span>
+                        @endif
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-semibold text-sm text-white leading-tight mb-1 truncate" title="{{ $rel->title }}">{{ $rel->title }}</div>
-                        <div class="text-[#aaa] text-xs truncate">{{ $rel->user->name ?? 'Unknown' }}</div>
-                        <div class="text-[#aaa] text-xs flex items-center gap-2 mt-1">
-                            <span>{{ $rel->created_at->diffForHumans() }}</span>
-                            @if($rel->duration)
-                                <span>• {{ $rel->duration }}</span>
-                            @endif
-                        </div>
-                    </div>
-                </a>
+                </div>
+            </a>
             @endforeach
         </div>
     </div>
@@ -381,7 +400,9 @@ video-player-page
         border: 1px solid #333;
         transition: background 0.2s, color 0.2s;
     }
-    .subscribed-btn:hover, .subscribed-btn:focus {
+
+    .subscribed-btn:hover,
+    .subscribed-btn:focus {
         background: #232323 !important;
         color: #fff !important;
         /* Optionally, add a very subtle effect: */
