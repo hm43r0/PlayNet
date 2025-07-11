@@ -139,8 +139,9 @@ Route::post('/history/clear-range', function (\Illuminate\Http\Request $request)
     $deleted = $query->delete();
     return redirect()->route('history')->with('success', $deleted ? 'Selected watch history cleared.' : 'No history found for selected dates.');
 })->name('history.clear.range');
+
 Route::post('/history/pause-toggle', function () {
-    $user = Auth::user();
+    $user = \App\Models\User::find(Auth::id());
     $paused = session('history_paused', $user ? ($user->history_paused ?? false) : false);
     $paused = !$paused;
     session(['history_paused' => $paused]);
@@ -150,3 +151,15 @@ Route::post('/history/pause-toggle', function () {
     }
     return redirect()->route('history')->with('success', $paused ? 'Watch history paused.' : 'Watch history resumed.');
 })->name('history.pause.toggle');
+
+// Comment routes
+Route::post('/video/{video}/comments', [\App\Http\Controllers\CommentController::class, 'store'])->name('comments.store');
+Route::delete('/comments/{comment}', [\App\Http\Controllers\CommentController::class, 'destroy'])->name('comments.destroy');
+Route::post('/notifications/{notification}/read', function ($notificationId) {
+    $notification = \App\Models\Notification::findOrFail($notificationId);
+    if ($notification->user_id === auth()->id()) {
+        $notification->read_at = now();
+        $notification->save();
+    }
+    return back();
+})->name('notifications.read');

@@ -3,71 +3,71 @@
 @section('title', 'Playlists')
 
 @section('content')
-<div class="max-w-6xl mx-auto">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold">Your Playlists</h1>
+<div class="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white text-responsive-xl">Your Playlists</h1>
         <button onclick="showCreatePlaylistModal()" 
-                class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center gap-2">
+                class="glass-button rounded-full px-4 sm:px-6 py-2 sm:py-3 text-white font-semibold flex items-center gap-2 text-sm sm:text-base transition touch-manipulation">
             <i class="fa-solid fa-plus"></i>
             <span>Create Playlist</span>
         </button>
     </div>
 
     @if(session('success'))
-        <div class="bg-green-600 text-white p-3 rounded mb-4">
-            {{ session('success') }}
+        <div class="glass-notification rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 border border-green-500/20">
+            <div class="text-green-400 text-sm sm:text-base">{{ session('success') }}</div>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="bg-red-600 text-white p-3 rounded mb-4">
-            {{ session('error') }}
+        <div class="glass-notification rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 border border-red-500/20">
+            <div class="text-red-400 text-sm sm:text-base">{{ session('error') }}</div>
         </div>
     @endif
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         <!-- Watch Later Playlist -->
-        <div class="bg-[#181818] rounded-lg overflow-hidden hover:bg-[#232323] transition group">
-            <a href="{{ route('playlist.show', $watchLater) }}" class="block">
+        <div class="glass-card rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl group">
+            <a href="{{ route('playlist.show', $watchLater) }}" class="block touch-manipulation">
                 <div class="aspect-video bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center relative">
                     @if($watchLater->first_video_thumbnail)
                         <img src="{{ asset('storage/' . $watchLater->first_video_thumbnail) }}" 
                              alt="Watch Later" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                            <i class="fa-regular fa-clock text-4xl text-white"></i>
+                            <i class="fa-regular fa-clock text-3xl sm:text-4xl text-white"></i>
                         </div>
                     @else
-                        <i class="fa-regular fa-clock text-4xl text-white"></i>
+                        <i class="fa-regular fa-clock text-3xl sm:text-4xl text-white"></i>
                     @endif
-                    <div class="absolute bottom-2 right-2 bg-black bg-opacity-70 px-2 py-1 rounded text-xs">
+                    <div class="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-xs backdrop-blur-sm">
                         {{ $watchLater->video_count }} videos
                     </div>
                 </div>
-                <div class="p-4">
-                    <h3 class="font-semibold text-lg mb-1">Watch Later</h3>
-                    <p class="text-[#aaa] text-sm">Private playlist</p>
+                <div class="p-3 sm:p-4">
+                    <h3 class="font-semibold text-base sm:text-lg mb-1 text-white">Watch Later</h3>
+                    <p class="text-[#aaa] text-xs sm:text-sm">Private playlist</p>
                 </div>
             </a>
         </div>
 
         <!-- Regular Playlists -->
         @foreach($playlists as $playlist)
-            <div class="bg-[#181818] rounded-lg overflow-hidden hover:bg-[#232323] transition group relative">
-                <a href="{{ route('playlist.show', $playlist) }}" class="block">
+            <div class="glass-card rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl group relative">
+                <a href="{{ route('playlist.show', $playlist) }}" class="block touch-manipulation">
                     <div class="aspect-video bg-[#222] flex items-center justify-center relative">
                         @if($playlist->first_video_thumbnail)
                             <img src="{{ asset('storage/' . $playlist->first_video_thumbnail) }}" 
                                  alt="{{ $playlist->name }}" class="w-full h-full object-cover">
                         @else
-                            <i class="fa-solid fa-list text-4xl text-[#666]"></i>
+                            <i class="fa-solid fa-list text-3xl sm:text-4xl text-[#666]"></i>
                         @endif
-                        <div class="absolute bottom-2 right-2 bg-black bg-opacity-70 px-2 py-1 rounded text-xs">
+                        <div class="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-xs backdrop-blur-sm">
                             {{ $playlist->video_count }} videos
                         </div>
                     </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-lg mb-1 truncate">{{ $playlist->name }}</h3>
-                        <p class="text-[#aaa] text-sm capitalize">{{ $playlist->visibility }} playlist</p>
+                    <div class="p-3 sm:p-4">
+                        <h3 class="font-semibold text-base sm:text-lg mb-1 truncate text-white">{{ $playlist->name }}</h3>
+                        <p class="text-[#aaa] text-xs sm:text-sm capitalize">{{ $playlist->visibility }} playlist</p>
                         @if($playlist->description)
                             <p class="text-[#aaa] text-xs mt-1 line-clamp-2">{{ $playlist->description }}</p>
                         @endif
@@ -76,7 +76,7 @@
                 <!-- Edit and Delete buttons -->
                 <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition flex gap-1">
                     <a href="{{ route('playlist.edit', $playlist) }}" 
-                       class="bg-blue-600 hover:bg-blue-700 p-2 rounded-full"
+                       class="glass-button rounded-full p-2 text-blue-400 hover:bg-blue-600/20 transition touch-manipulation"
                        title="Edit playlist">
                         <i class="fa-solid fa-edit text-xs"></i>
                     </a>
@@ -84,7 +84,7 @@
                           onsubmit="return confirm('Are you sure you want to delete this playlist?')" class="inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 p-2 rounded-full"
+                        <button type="submit" class="glass-button rounded-full p-2 text-red-400 hover:bg-red-600/20 transition touch-manipulation"
                                 title="Delete playlist">
                             <i class="fa-solid fa-trash text-xs"></i>
                         </button>
@@ -95,12 +95,12 @@
     </div>
 
     @if($playlists->isEmpty())
-        <div class="text-center py-16">
-            <i class="fa-solid fa-list text-6xl text-[#666] mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">No playlists yet</h3>
-            <p class="text-[#aaa] mb-6">Create your first playlist to organize your favorite videos</p>
+        <div class="glass-card rounded-xl p-6 sm:p-8 md:p-16 text-center">
+            <i class="fa-solid fa-list text-4xl sm:text-5xl md:text-6xl text-[#666] mb-4 sm:mb-6"></i>
+            <h3 class="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4 text-white text-responsive-lg">No playlists yet</h3>
+            <p class="text-[#aaa] mb-4 sm:mb-6 text-sm sm:text-base text-responsive-base">Create your first playlist to organize your favorite videos</p>
             <button onclick="showCreatePlaylistModal()" 
-                    class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg">
+                    class="glass-button rounded-full px-6 sm:px-8 py-3 sm:py-4 text-white font-semibold text-sm sm:text-base transition touch-manipulation">
                 Create Your First Playlist
             </button>
         </div>
@@ -108,42 +108,42 @@
 </div>
 
 <!-- Create Playlist Modal -->
-<div id="createPlaylistModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <div class="bg-[#181818] rounded-lg p-6 w-full max-w-md mx-4">
-        <h2 class="text-xl font-bold mb-4">Create New Playlist</h2>
+<div id="createPlaylistModal" class="fixed inset-0 glass-overlay z-50 hidden flex items-center justify-center">
+    <div class="glass-card rounded-xl p-4 sm:p-6 w-full max-w-sm sm:max-w-md mx-4">
+        <h2 class="text-lg sm:text-xl font-bold mb-4 text-white">Create New Playlist</h2>
         <form method="POST" action="{{ route('playlists.store') }}">
             @csrf
             <div class="mb-4">
-                <label for="name" class="block text-sm font-medium mb-2">Name *</label>
+                <label for="name" class="block text-sm font-medium mb-2 text-white">Name *</label>
                 <input type="text" id="name" name="name" required maxlength="255"
-                       class="w-full px-3 py-2 bg-[#222] border border-[#333] rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                       class="w-full px-3 py-2 glass-input rounded-lg text-white focus:outline-none text-sm placeholder-[#606060]"
                        placeholder="Enter playlist name">
             </div>
             
             <div class="mb-4">
-                <label for="description" class="block text-sm font-medium mb-2">Description</label>
+                <label for="description" class="block text-sm font-medium mb-2 text-white">Description</label>
                 <textarea id="description" name="description" rows="3" maxlength="1000"
-                          class="w-full px-3 py-2 bg-[#222] border border-[#333] rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          class="w-full px-3 py-2 glass-input rounded-lg text-white focus:outline-none text-sm placeholder-[#606060]"
                           placeholder="Enter playlist description"></textarea>
             </div>
             
             <div class="mb-6">
-                <label for="visibility" class="block text-sm font-medium mb-2">Visibility</label>
+                <label for="visibility" class="block text-sm font-medium mb-2 text-white">Visibility</label>
                 <select id="visibility" name="visibility" required
-                        class="w-full px-3 py-2 bg-[#222] border border-[#333] rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        class="w-full px-3 py-2 glass-input rounded-lg text-white focus:outline-none text-sm">
                     <option value="private">Private</option>
                     <option value="unlisted">Unlisted</option>
                     <option value="public">Public</option>
                 </select>
             </div>
             
-            <div class="flex gap-3">
+            <div class="flex flex-col sm:flex-row gap-3">
                 <button type="button" onclick="hideCreatePlaylistModal()"
-                        class="flex-1 px-4 py-2 border border-[#333] rounded hover:bg-[#222] transition">
+                        class="flex-1 px-4 py-2 glass-button rounded-lg transition text-white font-semibold text-sm touch-manipulation">
                     Cancel
                 </button>
                 <button type="submit"
-                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition">
+                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition text-white font-semibold text-sm touch-manipulation">
                     Create
                 </button>
             </div>

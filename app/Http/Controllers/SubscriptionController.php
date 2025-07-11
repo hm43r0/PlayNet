@@ -22,6 +22,16 @@ class SubscriptionController extends Controller
         }
         if (!$subscriber->subscriptions()->where('channel_id', $user->id)->exists()) {
             $subscriber->subscriptions()->attach($user->id);
+
+            // Notify channel owner
+            \App\Models\Notification::create([
+                'user_id' => $user->id,
+                'data' => [
+                    'type' => 'subscribed',
+                    'subscriber_id' => $subscriber->id,
+                    'subscriber_name' => $subscriber->name,
+                ],
+            ]);
         }
         return response()->json(['subscribed' => true, 'count' => $user->subscribers()->count()]);
     }

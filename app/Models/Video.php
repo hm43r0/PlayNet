@@ -45,6 +45,11 @@ class Video extends Model
         return $this->hasMany(\App\Models\VideoHistory::class);
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
     public function getFormattedViewsAttribute()
     {
         return number_format($this->views);

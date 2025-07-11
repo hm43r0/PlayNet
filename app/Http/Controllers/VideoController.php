@@ -62,6 +62,20 @@ class VideoController extends Controller
             'video_path' => $videoPath,
         ]);
 
+        // Notify subscribers
+        $subscribers = \App\Models\Subscription::where('channel_id', Auth::id())->pluck('user_id');
+        foreach ($subscribers as $subscriberId) {
+            \App\Models\Notification::create([
+                'user_id' => $subscriberId,
+                'data' => [
+                    'type' => 'video_upload',
+                    'video_id' => $video->id,
+                    'title' => $video->title,
+                    'uploader' => Auth::user()->name,
+                ],
+            ]);
+        }
+
         return redirect()->route('videos.index')->with('success', 'Video uploaded successfully!');
     }
 
@@ -106,6 +120,19 @@ class VideoController extends Controller
         $user = Auth::user();
         if (!$video->likes()->where('user_id', $user->id)->exists()) {
             $video->likes()->attach($user->id);
+
+            // Notify video owner
+            if ($video->user_id !== $user->id) {
+                \App\Models\Notification::create([
+                    'user_id' => $video->user_id,
+                    'data' => [
+                        'type' => 'like',
+                        'video_id' => $video->id,
+                        'liker_id' => $user->id,
+                        'liker_name' => $user->name,
+                    ],
+                ]);
+            }
         }
         return response()->json(['liked' => true, 'count' => $video->likes()->count()]);
     }
