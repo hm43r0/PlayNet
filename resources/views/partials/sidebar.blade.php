@@ -48,7 +48,25 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('watchlater') }}" class="flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-white font-medium transition-all duration-300 touch-manipulation {{ request()->routeIs('watchlater') ? 'glass-light text-blue-300' : 'hover:glass-light hover:text-blue-300' }}">
+                @php
+                // Get the current playlist if on playlist.show
+                $isWatchLaterActive = request()->routeIs('watchlater');
+                if (request()->routeIs('playlist.show')) {
+                $playlist = request()->route('playlist');
+                // $playlist can be a model or an ID, handle both
+                if (is_object($playlist)) {
+                $isWatchLaterActive = $playlist->is_watch_later ?? false;
+                } else {
+                $user = auth()->user();
+                if ($user) {
+                $watchLater = $user->watchLaterPlaylist();
+                $isWatchLaterActive = $watchLater && $watchLater->id == $playlist;
+                }
+                }
+                }
+                @endphp
+                <a href="{{ route('watchlater') }}"
+                    class="flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-white font-medium transition-all duration-300 touch-manipulation {{ $isWatchLaterActive ? 'glass-light text-blue-300' : 'hover:glass-light hover:text-blue-300' }}">
                     <i class="fa-regular fa-clock mr-3 sm:mr-4 text-base sm:text-lg"></i>
                     <span class="text-sm sm:text-base">Watch Later</span>
                 </a>
@@ -73,33 +91,33 @@
             <span class="text-white text-sm sm:text-base font-bold">Subscriptions</span>
         </div>
         @if(auth()->check())
-            @php $channels = auth()->user()->subscriptions()->limit(8)->get(); @endphp
-            @forelse($channels as $channel)
-                <div class="flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-xl hover:glass-light transition-all duration-300 cursor-pointer group touch-manipulation">
-                    <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs sm:text-sm font-bold text-white mr-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                        {{ strtoupper($channel->name[0]) }}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="text-white text-xs sm:text-sm font-medium truncate group-hover:text-blue-300 transition-colors duration-300">{{ $channel->name }}</div>
-                        <div class="text-[#aaa] text-xs truncate">{{ $channel->subscribers_count ?? 0 }} subscribers</div>
-                    </div>
-                    <div class="w-2 h-2 rounded-full bg-red-500 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
-            @empty
-                <div class="px-3 sm:px-4 py-3 text-center">
-                    <i class="fa-solid fa-user-plus text-2xl sm:text-3xl text-[#666] mb-2 block"></i>
-                    <div class="text-[#aaa] text-xs sm:text-sm">No subscriptions yet</div>
-                    <a href="{{ route('home') }}" class="text-blue-400 text-xs hover:text-blue-300 transition-colors duration-300">Browse channels</a>
-                </div>
-            @endforelse
-        @else
-            <div class="px-3 sm:px-4 py-3 text-center glass-card rounded-xl">
-                <i class="fa-solid fa-user text-2xl sm:text-3xl text-[#666] mb-2 block"></i>
-                <div class="text-[#aaa] text-xs sm:text-sm mb-2">Sign in to see your subscriptions</div>
-                <a href="{{ route('login') }}" class="glass-button rounded-full px-3 py-1 text-xs text-white hover:text-blue-300 transition-colors duration-300">
-                    Sign In
-                </a>
+        @php $channels = auth()->user()->subscriptions()->limit(8)->get(); @endphp
+        @forelse($channels as $channel)
+        <div class="flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-xl hover:glass-light transition-all duration-300 cursor-pointer group touch-manipulation">
+            <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs sm:text-sm font-bold text-white mr-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                {{ strtoupper($channel->name[0]) }}
             </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-white text-xs sm:text-sm font-medium truncate group-hover:text-blue-300 transition-colors duration-300">{{ $channel->name }}</div>
+                <div class="text-[#aaa] text-xs truncate">{{ $channel->subscribers_count ?? 0 }} subscribers</div>
+            </div>
+            <div class="w-2 h-2 rounded-full bg-red-500 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </div>
+        @empty
+        <div class="px-3 sm:px-4 py-3 text-center">
+            <i class="fa-solid fa-user-plus text-2xl sm:text-3xl text-[#666] mb-2 block"></i>
+            <div class="text-[#aaa] text-xs sm:text-sm">No subscriptions yet</div>
+            <a href="{{ route('home') }}" class="text-blue-400 text-xs hover:text-blue-300 transition-colors duration-300">Browse channels</a>
+        </div>
+        @endforelse
+        @else
+        <div class="px-3 sm:px-4 py-3 text-center glass-card rounded-xl">
+            <i class="fa-solid fa-user text-2xl sm:text-3xl text-[#666] mb-2 block"></i>
+            <div class="text-[#aaa] text-xs sm:text-sm mb-2">Sign in to see your subscriptions</div>
+            <a href="{{ route('login') }}" class="glass-button rounded-full px-3 py-1 text-xs text-white hover:text-blue-300 transition-colors duration-300">
+                Sign In
+            </a>
+        </div>
         @endif
     </div>
 

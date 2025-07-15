@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,12 +20,14 @@
             scroll-behavior: smooth;
             overflow-x: hidden;
         }
+
         body {
             font-family: 'Roboto', sans-serif;
             /* Using Roboto as per original design */
             background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
             min-height: 100vh;
         }
+
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -117,7 +120,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
+            background:
                 radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
@@ -126,12 +129,23 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            33% { transform: translateY(-20px) rotate(1deg); }
-            66% { transform: translateY(10px) rotate(-1deg); }
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            33% {
+                transform: translateY(-20px) rotate(1deg);
+            }
+
+            66% {
+                transform: translateY(10px) rotate(-1deg);
+            }
         }
     </style>
 </head>
+
 <body class="text-white font-roboto @stack('body_class')">
     <div x-data="sidebarApp()" x-init="init()">
         <!-- Header (full width, fixed at top) -->
@@ -151,32 +165,31 @@
                 <div class="flex w-full">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Search"
                         class="flex-1 rounded-l-full px-4 py-2 glass-input text-white focus:outline-none text-base placeholder-[#606060]">
-                    <button type="submit"
-                        class="glass-button rounded-r-full px-6 py-2 text-white">
+                    <button type="submit" class="glass-button rounded-r-full px-6 py-2 text-white">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </div>
             </form>
-            <!-- Mobile Search Icon -->
-            <button class="md:hidden p-2 glass-button rounded-full mx-2" @click="mobileSearch = true">
-                <i class="fa-solid fa-magnifying-glass text-xl"></i>
-            </button>
             <!-- Mobile Search Overlay -->
             <div x-show="mobileSearch" class="fixed inset-0 z-50 glass-overlay flex items-start pt-4 px-4"
                 style="display: none;" x-transition>
                 <form class="flex w-full max-w-2xl mx-auto" method="GET" action="{{ route('home') }}">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Search"
                         class="flex-1 rounded-l-full px-4 py-2 glass-input text-white focus:outline-none text-base placeholder-[#606060]">
-                    <button type="submit"
-                        class="glass-button rounded-r-full px-6 py-2 text-white">
+                    <button type="submit" class="glass-button rounded-r-full px-6 py-2 text-white">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
-                    <button type="button" class="ml-2 p-2 text-white glass-button rounded-full" @click="mobileSearch = false">
+                    <button type="button" class="ml-2 p-2 text-white glass-button rounded-full"
+                        @click="mobileSearch = false">
                         <i class="fa-solid fa-times text-2xl"></i>
                     </button>
                 </form>
             </div>
             <div class="flex items-center gap-2 md:gap-4 min-w-0 md:min-w-[180px] justify-end relative">
+                <!-- Mobile Search Icon -->
+                <button class="md:hidden p-2 glass-button rounded-full mx-2" @click="mobileSearch = true">
+                    <i class="fa-solid fa-magnifying-glass text-xl"></i>
+                </button>
                 <!-- Hide Create button on mobile -->
                 <button
                     class="glass-button rounded-full px-4 py-1.5 flex items-center space-x-2 text-sm transition hidden md:flex">
@@ -204,12 +217,14 @@
                             @endif
                         </button>
                         <div x-show="open" @click.away="open = false"
-                            class="absolute right-0 mt-2 w-96 glass-notification rounded-xl z-50"
-                            style="display: none;" x-transition>
-                            <div class="p-4 border-b border-[rgba(255,255,255,0.1)] font-semibold text-lg text-white">Notifications</div>
+                            class="absolute right-0 mt-2 w-96 glass-notification rounded-xl z-50" style="display: none;"
+                            x-transition>
+                            <div class="p-4 border-b border-[rgba(255,255,255,0.1)] font-semibold text-lg text-white">
+                                Notifications</div>
                             <div class="max-h-96 overflow-y-auto divide-y divide-[rgba(255,255,255,0.1)]">
                                 @forelse($unreadNotifications as $notification)
-                                    <div class="p-4 glass-notification-item flex gap-3 items-center transition-all duration-200">
+                                    <div
+                                        class="p-4 glass-notification-item flex gap-3 items-center transition-all duration-200">
                                         <i
                                             class="fa-solid {{ notificationIcon($notification->data['type'] ?? null) }} text-xl"></i>
                                         <div class="flex-1 min-w-0">
@@ -245,8 +260,8 @@
                                         </div>
                                         <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
                                             @csrf
-                                            <button class="ml-2 text-[#aaa] hover:text-green-400 p-1 glass-button rounded" title="Mark as read"><i
-                                                    class="fa-solid fa-check"></i></button>
+                                            <button class="ml-2 text-[#aaa] hover:text-green-400 p-1 glass-button rounded"
+                                                title="Mark as read"><i class="fa-solid fa-check"></i></button>
                                         </form>
                                     </div>
                                 @empty
@@ -264,8 +279,8 @@
                             {{ strtoupper(auth()->user()->name[0]) }}
                         </button>
                         <div x-show="open" @click.away="open = false"
-                            class="absolute right-0 mt-2 w-80 glass-notification rounded-xl z-50"
-                            style="display: none;" x-transition>
+                            class="absolute right-0 mt-2 w-80 glass-notification rounded-xl z-50" style="display: none;"
+                            x-transition>
                             <!-- Current Account -->
                             <div class="p-4 border-b border-[rgba(255,255,255,0.1)]">
                                 <div class="flex items-center gap-3">
@@ -279,7 +294,9 @@
                                             {{ '@' . (auth()->user()->username ?? Str::slug(auth()->user()->name)) }}</div>
                                     </div>
                                 </div>
-                                <div class="mt-2 text-xs text-blue-400 cursor-pointer hover:text-blue-300 transition-colors">View your channel</div>
+                                <div
+                                    class="mt-2 text-xs text-blue-400 cursor-pointer hover:text-blue-300 transition-colors">
+                                    View your channel</div>
                             </div>
                             <!-- Linked Accounts -->
                             @if (auth()->user()->getAllLinkedAccounts()->count() > 0)
@@ -335,11 +352,11 @@
             <!-- Unified Sidebar (Fixed Overlay for All Pages) -->
             <div>
                 <!-- Backdrop for mobile/overlay sidebar -->
-                <div class="fixed inset-0 glass-overlay z-40" x-show="sidebarOpen"
-                    @click="sidebarOpen = false" x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                    x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
-                    x-transition:leave-end="opacity-0" style="display: none;"></div>
+                <div class="fixed inset-0 glass-overlay z-40" x-show="sidebarOpen" @click="sidebarOpen = false"
+                    x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" style="display: none;">
+                </div>
                 <!-- Fixed sidebar for all pages -->
                 <aside x-show="sidebarOpen"
                     class="fixed top-0 left-0 w-4/5 max-w-xs md:w-60 glass h-full flex flex-col pt-16 z-50 transition-all duration-200"
@@ -398,4 +415,5 @@
         }
     @endphp
 </body>
+
 </html>
