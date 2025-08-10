@@ -1,17 +1,31 @@
+
 # PlayNet: YouTube-Style Video Platform
 
-PlayNet is a modern, YouTube-inspired video sharing platform built with Laravel. It features:
+**PlayNet** is a modern, YouTube-inspired video sharing platform built with Laravel. It provides a full-featured demo of a video-centric social platform, including:
 
-- User authentication and channel subscriptions
+- User authentication, channel subscriptions, and profile management
 - Video upload, playback, and playlist management
 - Like/dislike system with real-time UI feedback
-- Unique view counter (per authenticated user)
-- Watch history and watch later functionality
-- Realistic demo data seeding for users, videos, and playlists
+- Unique view counter per authenticated user
+- Watch history and "Watch Later" functionality
+- Save-to-playlist with a popup modal and real-time feedback
+- Playlist creation, editing, and deletion with full validation
 - Responsive, YouTube-style UI using Tailwind CSS and SVG icons
-- Related videos, sharing, and save-to-playlist features
+- Related videos, sharing, and robust API endpoints
+- Realistic demo data seeding for users, videos, and playlists
 
-PlayNet is designed for learning, demo, and rapid prototyping of video-centric social platforms. It demonstrates best practices in Laravel, Eloquent, and modern frontend development.
+**Technical highlights:**
+- Built with Laravel (PHP) for the backend and Blade templates with Alpine.js for the frontend
+- RESTful API endpoints for playlist and video management
+- Real-time UI updates and accessibility features
+- Mobile-friendly, consistent design
+
+**Purpose:**  
+PlayNet is designed for learning, demonstration, and rapid prototyping of video-sharing platforms. It showcases best practices in Laravel, Eloquent ORM, and modern frontend development.
+
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+
+<p align="center">
 
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
